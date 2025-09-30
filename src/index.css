@@ -1,0 +1,205 @@
+@import "tailwindcss";
+@import "tailwindcss";
+
+/* index.css or global.css */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px; /* horizontal scrollbar height */
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.5); /* slate-500 */
+  border-radius: 9999px;
+}
+
+
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
+
+.auth-container {
+    perspective: 1200px;
+    transform-style: preserve-3d;
+}
+
+.form-card {
+    transform-style: preserve-3d;
+    transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backface-visibility: hidden;
+}
+
+.form-card.flipped {
+    transform: rotateY(180deg);
+}
+
+.form-side {
+    backface-visibility: hidden;
+    transition: all 0.6s ease;
+}
+
+.form-back {
+    transform: rotateY(180deg);
+}
+
+.floating-shapes {
+    animation: float 8s ease-in-out infinite;
+}
+
+.floating-shapes:nth-child(2) {
+    animation-delay: -2s;
+}
+
+.floating-shapes:nth-child(3) {
+    animation-delay: -4s;
+}
+
+.floating-shapes:nth-child(4) {
+    animation-delay: -6s;
+}
+
+@keyframes float {
+    0%, 100% { 
+        transform: translateY(0px) translateX(0px) rotate(0deg); 
+        opacity: 0.7;
+    }
+    25% { 
+        transform: translateY(-20px) translateX(10px) rotate(90deg); 
+        opacity: 0.8;
+    }
+    50% { 
+        transform: translateY(-10px) translateX(-10px) rotate(180deg); 
+        opacity: 0.6;
+    }
+    75% { 
+        transform: translateY(-30px) translateX(5px) rotate(270deg); 
+        opacity: 0.9;
+    }
+}
+
+.particle {
+    animation: particleFloat 6s linear infinite;
+}
+
+@keyframes particleFloat {
+    0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.input-group {
+    position: relative;
+}
+
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label {
+    transform: translateY(-28px) scale(0.8);
+    color: #8b5cf6;
+}
+
+.input-group label {
+    transition: all 0.3s ease;
+    transform-origin: left top;
+}
+
+.glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.gradient-border {
+    background: linear-gradient(45deg, #8b5cf6, #06b6d4, #10b981, #f59e0b);
+    padding: 2px;
+    border-radius: 16px;
+}
+
+.gradient-border-inner {
+    background: rgba(17, 24, 39, 0.95);
+    border-radius: 14px;
+}
+
+.social-btn {
+    transition: all 0.3s ease;
+    transform: translateY(0);
+}
+
+.social-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.ripple-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple-effect:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.ripple-effect:active:before {
+    width: 300px;
+    height: 300px;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(139, 92, 246, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+    }
+}
+
+.slide-in {
+    animation: slideIn 0.6s ease-out forwards;
+}
+
+@keyframes slideIn {
+    0% {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.glow-effect {
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+}
+
+.loading {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
