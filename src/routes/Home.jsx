@@ -186,7 +186,7 @@ export default function Home() {
             Welcome, {userData.first_name} (ID: {userData.id})
           </h3>
           <Link to={'/face-recognition'}>Face Recognition</Link>
-           <Link to={'/fingerprint-register'}>Fingerprint Register</Link>
+           <Link to={'/fingerprint-register'}>Fingerprint Registerss</Link>
         </div>
       )}
     </div>
