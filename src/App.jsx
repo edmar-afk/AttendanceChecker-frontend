@@ -3,6 +3,8 @@ import Welcome from "./routes/Welcome";
 import Home from "./routes/Home";
 import Register from "./routes/Register";
 import Login from "./routes/Login";
+import FaceRecognition from "./routes/FaceRecognition";
+import FingerprintRegister from "./routes/FingerprintRegister";
 
 function Logout() {
   localStorage.clear();
@@ -26,6 +28,8 @@ function App() {
           }
         />
         <Route path="/home" element={<Home />} />
+        <Route path="/face-recognition" element={<FaceRecognition />} />
+        <Route path="/fingerprint-register" element={<FingerprintRegister />} />
       </Routes>
     </BrowserRouter>
   );

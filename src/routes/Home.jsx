@@ -1,11 +1,194 @@
-import React from 'react'
+import React, { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
+const API_BASE = import.meta.env.VITE_API_URL;
+export default function Home() {
+  const [stream, setStream] = useState(null);
+  const [capturedImage, setCapturedImage] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const videoRef = useRef(null);
 
-function Home() {
+  useEffect(() => {
+    const startCamera = async () => {
+      try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
+        setStream(mediaStream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
+      } catch (err) {
+        console.error("Camera error:", err);
+        alert("Cannot access camera");
+      }
+    };
+
+    startCamera();
+
+    // Load userData from localStorage
+    const storedUserData = localStorage.getItem("userData");
+    if (storedUserData) {
+      setUserData(JSON.parse(storedUserData));
+    }
+
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
+
+  const captureImage = () => {
+    if (!videoRef.current) return;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = videoRef.current.videoWidth;
+    canvas.height = videoRef.current.videoHeight;
+    const context = canvas.getContext("2d");
+    context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(
+      (blob) => {
+        const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
+        setCapturedImage(file);
+      },
+      "image/jpeg",
+      1
+    );
+  };
+
+  const registerFace = async () => {
+    if (!capturedImage) return alert("No image captured");
+
+    const formData = new FormData();
+    formData.append("face_image", capturedImage);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/register-face/${userData.id}/`, {
+        method: "POST",
+        body: formData,
+      });
+
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (err) {
+        console.error("Failed to parse JSON:", err);
+      }
+
+      if (res.ok) alert("Face registered successfully!");
+      else alert((data && data.message) || "Registration failed");
+    } catch (err) {
+      console.error(err);
+      alert("Error registering face");
+    }
+  };
+
+  const matchFace = async () => {
+    if (!capturedImage) return alert("No image captured");
+
+    const formData = new FormData();
+    formData.append("face_image", capturedImage);
+
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/match-face/?user_id=${userData.id}`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (err) {
+        console.error("Failed to parse JSON:", err);
+      }
+
+      if (res.ok && data?.match) {
+        localStorage.setItem(
+          "userData",
+          JSON.stringify({ id: data.user_id, first_name: data.name })
+        );
+        setUserData({ id: data.user_id, first_name: data.name });
+        alert("Face matched successfully!");
+      } else {
+        alert((data && data.message) || "No match found");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error matching face");
+    }
+  };
+
   return (
-    <div>
-      
-    </div>
-  )
-}
+    <div className="p-6 max-w-md mx-auto bg-green-50 rounded-xl shadow-md space-y-6">
+      <h1 className="text-2xl font-bold text-green-800 text-center">
+        Face Registration & Verification
+      </h1>
 
-export default Home
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold text-green-700">Live Camera</h2>
+        {!capturedImage && (
+          <div className="relative">
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              className="w-full rounded-lg border border-green-300"
+            ></video>
+            <button
+              onClick={captureImage}
+              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 transition"
+            >
+              Capture
+            </button>
+          </div>
+        )}
+
+        {capturedImage && (
+          <div className="space-y-2">
+            <h3 className="text-green-700 font-semibold">Preview</h3>
+            <img
+              src={URL.createObjectURL(capturedImage)}
+              alt="captured"
+              className="w-full rounded-lg border border-green-300"
+            />
+            <div className="flex space-x-2">
+              <button
+                onClick={registerFace}
+                className="flex-1 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition"
+              >
+                Register Face
+              </button>
+              <button
+                onClick={matchFace}
+                className="flex-1 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 transition"
+              >
+                Match Face
+              </button>
+            </div>
+            <button
+              onClick={() => setCapturedImage(null)}
+              className="w-full bg-green-200 text-green-800 font-semibold py-2 px-4 rounded-lg hover:bg-green-300 transition"
+            >
+              Retake
+            </button>
+          </div>
+        )}
+      </div>
+
+      {userData && (
+        <div className="mt-6 p-4 bg-green-100 rounded-lg border border-green-200">
+          <h3 className="text-green-800 font-semibold">
+            Welcome, {userData.first_name} (ID: {userData.id})
+          </h3>
+          <Link to={'/face-recognition'}>Face Recognition</Link>
+           <Link to={'/fingerprint-register'}>Fingerprint Register</Link>
+        </div>
+      )}
+    </div>
+  );
+}

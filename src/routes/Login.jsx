@@ -31,8 +31,20 @@ function Login() {
 
       localStorage.setItem("access", res.data.access);
       localStorage.setItem("refresh", res.data.refresh);
-      navigate("/dashboard");
-      // eslint-disable-next-line no-unused-vars
+      localStorage.setItem(
+        "userData",
+        JSON.stringify({
+          id: res.data.id,
+          username: res.data.username,
+          email: res.data.email,
+          first_name: res.data.first_name,
+          last_name: res.data.last_name,
+          is_staff: res.data.is_staff,
+          is_superuser: res.data.is_superuser,
+        })
+      );
+
+      navigate("/home");
     } catch (err) {
       Swal.fire({
         toast: true,
