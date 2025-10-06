@@ -38,6 +38,22 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleMessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        setUserData(data);
+        localStorage.setItem("userData", event.data);
+      } catch (e) {
+        console.error("Failed to parse message from React Native:", e);
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
+
   const captureImage = () => {
     if (!videoRef.current) return;
 
@@ -84,44 +100,6 @@ export default function Home() {
     }
   };
 
-  const matchFace = async () => {
-    if (!capturedImage) return alert("No image captured");
-
-    const formData = new FormData();
-    formData.append("face_image", capturedImage);
-
-    try {
-      const res = await fetch(
-        `${API_BASE}/api/match-face/?user_id=${userData.id}`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      let data = null;
-      try {
-        data = await res.json();
-      } catch (err) {
-        console.error("Failed to parse JSON:", err);
-      }
-
-      if (res.ok && data?.match) {
-        localStorage.setItem(
-          "userData",
-          JSON.stringify({ id: data.user_id, first_name: data.name })
-        );
-        setUserData({ id: data.user_id, first_name: data.name });
-        alert("Face matched successfully!");
-      } else {
-        alert((data && data.message) || "No match found");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error matching face");
-    }
-  };
-
   return (
     <div className="p-6 max-w-md mx-auto bg-green-50 rounded-xl shadow-md space-y-6">
       <h1 className="text-2xl font-bold text-green-800 text-center">
@@ -163,12 +141,6 @@ export default function Home() {
               >
                 Register Face
               </button>
-              <button
-                onClick={matchFace}
-                className="flex-1 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 transition"
-              >
-                Match Face
-              </button>
             </div>
             <button
               onClick={() => setCapturedImage(null)}
@@ -185,8 +157,8 @@ export default function Home() {
           <h3 className="text-green-800 font-semibold">
             Welcome, {userData.first_name} (ID: {userData.id})
           </h3>
-          <Link to={'/face-recognition'}>Face Recognition</Link>
-           <Link to={'/fingerprint-register'}>Fingerprint Registerss</Link>
+          <Link to={"/face-recognition"}>Face Recognition</Link>
+          <Link to={"/fingerprint-register"}>Fingerprint Registerss</Link>
         </div>
       )}
     </div>
