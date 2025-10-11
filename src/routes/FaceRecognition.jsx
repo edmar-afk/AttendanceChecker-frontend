@@ -5,6 +5,7 @@ export default function FaceRecognition() {
   const [stream, setStream] = useState(null);
   const [matchedUser, setMatchedUser] = useState(null);
   const [attendanceId, setAttendanceId] = useState(null);
+  const [cameraStarted, setCameraStarted] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(document.createElement("canvas"));
   const intervalRef = useRef(null);
@@ -21,26 +22,22 @@ export default function FaceRecognition() {
         console.error("Invalid message data", e);
       }
     };
-
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
-  useEffect(() => {
-    const startCamera = async () => {
-      try {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-        });
-        setStream(mediaStream);
-      } catch (err) {
-        console.error("Camera error:", err);
-        alert("Cannot access camera");
-      }
-    };
-
-    startCamera();
-  }, []);
+  const startCamera = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+      });
+      setStream(mediaStream);
+      setCameraStarted(true);
+    } catch (err) {
+      console.error("Camera error:", err);
+      alert("Cannot access camera");
+    }
+  };
 
   useEffect(() => {
     if (videoRef.current && stream) {
@@ -49,7 +46,7 @@ export default function FaceRecognition() {
   }, [stream]);
 
   useEffect(() => {
-    if (!videoRef.current) return;
+    if (!cameraStarted || !videoRef.current) return;
 
     const matchLoop = async () => {
       if (!videoRef.current || matchedUser) return;
@@ -85,15 +82,27 @@ export default function FaceRecognition() {
     };
 
     intervalRef.current = setInterval(matchLoop, 1000);
-
     return () => clearInterval(intervalRef.current);
-  }, [matchedUser]);
+  }, [cameraStarted, matchedUser]);
 
   return (
     <div className="p-6 max-w-md mx-auto bg-blue-50 rounded-xl shadow-md space-y-6">
       <h1 className="text-2xl font-bold text-blue-800 text-center">
         Live Face Match
       </h1>
+
+      {!cameraStarted ? (
+        <button
+          onClick={startCamera}
+          className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
+        >
+          Start Camera
+        </button>
+      ) : (
+        <p className="text-center text-green-600 font-semibold">
+          Camera Started
+        </p>
+      )}
 
       {attendanceId && (
         <p className="text-center text-blue-700 font-medium">
