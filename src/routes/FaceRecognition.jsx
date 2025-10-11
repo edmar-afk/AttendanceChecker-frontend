@@ -4,9 +4,27 @@ const API_BASE = import.meta.env.VITE_API_URL;
 export default function FaceRecognition() {
   const [stream, setStream] = useState(null);
   const [matchedUser, setMatchedUser] = useState(null);
+  const [attendanceId, setAttendanceId] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(document.createElement("canvas"));
   const intervalRef = useRef(null);
+
+  useEffect(() => {
+    const handleMessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.attendanceId) {
+          setAttendanceId(data.attendanceId);
+          console.log("Received attendanceId:", data.attendanceId);
+        }
+      } catch (e) {
+        console.error("Invalid message data", e);
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
 
   useEffect(() => {
     const startCamera = async () => {
@@ -68,7 +86,7 @@ export default function FaceRecognition() {
       }, "image/jpeg");
     };
 
-    intervalRef.current = setInterval(matchLoop, 1000); // try every 1 second
+    intervalRef.current = setInterval(matchLoop, 1000);
 
     return () => clearInterval(intervalRef.current);
   }, [matchedUser]);
@@ -78,6 +96,12 @@ export default function FaceRecognition() {
       <h1 className="text-2xl font-bold text-blue-800 text-center">
         Live Face Match
       </h1>
+
+      {attendanceId && (
+        <p className="text-center text-blue-700 font-medium">
+          Attendance ID: {attendanceId}
+        </p>
+      )}
 
       <div className="relative">
         <video
