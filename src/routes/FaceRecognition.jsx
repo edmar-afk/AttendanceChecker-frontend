@@ -101,7 +101,7 @@ export default function FaceRecognition() {
   return (
     <div className="p-6 max-w-md mx-auto bg-blue-50 rounded-xl shadow-md space-y-6">
       <h1 className="text-2xl font-bold text-blue-800 text-center">
-        Live Face Match updated 10
+        Live Face Match updated 11
       </h1>
 
       {!cameraStarted ? (
@@ -136,7 +136,7 @@ export default function FaceRecognition() {
       {matchedUser && (
         <div className="mt-6 p-4 bg-blue-100 rounded-lg border border-blue-200 text-center">
           <h3 className="text-blue-800 font-semibold">
-            Face Matched! User ID: {matchedUser.id} - {matchedUser.user_id}
+            Face Matched! User ID: {matchedUser.user_id} - {matchedUser.user_id}
           </h3>
 
           {!timeInSuccess && (
