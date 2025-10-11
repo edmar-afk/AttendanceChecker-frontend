@@ -6,6 +6,7 @@ export default function FaceRecognition() {
   const [matchedUser, setMatchedUser] = useState(null);
   const [attendanceId, setAttendanceId] = useState(null);
   const [cameraStarted, setCameraStarted] = useState(false);
+  const [loadingTimeIn, setLoadingTimeIn] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(document.createElement("canvas"));
   const intervalRef = useRef(null);
@@ -45,6 +46,28 @@ export default function FaceRecognition() {
     }
   }, [stream]);
 
+  const uploadTimeIn = async (userId) => {
+    if (!attendanceId || !userId) return;
+    setLoadingTimeIn(true);
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/face-recognition-timein/${attendanceId}/${userId}/`,
+        { method: "POST" }
+      );
+      const data = await res.json();
+      if (res.ok) {
+        console.log("Time in uploaded:", data);
+        alert("✅ Time-in successfully recorded!");
+      } else {
+        alert(data.message || "❌ Failed to time in");
+      }
+    } catch (err) {
+      console.error("Error uploading time in:", err);
+    } finally {
+      setLoadingTimeIn(false);
+    }
+  };
+
   useEffect(() => {
     if (!cameraStarted || !videoRef.current) return;
 
@@ -74,6 +97,7 @@ export default function FaceRecognition() {
           if (res.ok && data?.match) {
             setMatchedUser({ id: data.user_id, name: data.name });
             clearInterval(intervalRef.current);
+            await uploadTimeIn(data.user_id);
           }
         } catch (err) {
           console.error("Error matching face:", err);
@@ -88,7 +112,7 @@ export default function FaceRecognition() {
   return (
     <div className="p-6 max-w-md mx-auto bg-blue-50 rounded-xl shadow-md space-y-6">
       <h1 className="text-2xl font-bold text-blue-800 text-center">
-        Live Face Match updated 1
+        Live Face Match
       </h1>
 
       {!cameraStarted ? (
@@ -125,6 +149,13 @@ export default function FaceRecognition() {
           <h3 className="text-blue-800 font-semibold">
             Face Matched! User ID: {matchedUser.id} - {matchedUser.name}
           </h3>
+          {loadingTimeIn ? (
+            <p className="text-blue-600 mt-2">Uploading time in...</p>
+          ) : (
+            <p className="text-green-600 mt-2 font-medium">
+              Time-in recorded successfully!
+            </p>
+          )}
         </div>
       )}
     </div>
