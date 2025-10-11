@@ -49,17 +49,16 @@ export default function FaceRecognition() {
 
   const uploadTimeIn = async () => {
     console.log("uploadTimeIn called");
-    if (!attendanceId || !matchedUser?.name) return;
     setLoadingTimeIn(true);
     try {
-      const { data } = await api.post(
-        `/api/facerecognition-timein/${attendanceId}/${matchedUser.name}/`
-      );
+      const { data } = await api.post(`/api/facerecognition-timein/${attendanceId}/${matchedUser.name}/`, {});
+      // ${attendanceId}
+      // ${matchedUser.name}
       console.log("Time in uploaded:", data);
       setTimeInSuccess(true);
     } catch (err) {
       console.error("Error uploading time in:", err);
-      alert(err.response?.data?.message || "❌ Failed to time in");
+      alert(err.response?.data?.error || "❌ Failed to time in");
     } finally {
       setLoadingTimeIn(false);
     }
@@ -113,7 +112,9 @@ export default function FaceRecognition() {
           Start Camera
         </button>
       ) : (
-        <p className="text-center text-green-600 font-semibold">Camera Started</p>
+        <p className="text-center text-green-600 font-semibold">
+          Camera Started
+        </p>
       )}
 
       {attendanceId && (
