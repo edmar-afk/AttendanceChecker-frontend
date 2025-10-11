@@ -7,6 +7,7 @@ export default function FaceRecognition() {
   const [attendanceId, setAttendanceId] = useState(null);
   const [cameraStarted, setCameraStarted] = useState(false);
   const [loadingTimeIn, setLoadingTimeIn] = useState(false);
+  const [timeInSuccess, setTimeInSuccess] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(document.createElement("canvas"));
   const intervalRef = useRef(null);
@@ -47,17 +48,20 @@ export default function FaceRecognition() {
   }, [stream]);
 
   const uploadTimeIn = async () => {
+    console.log("uploadTimeIn called"); // <--- ADD THIS
     if (!attendanceId || !matchedUser?.name) return;
     setLoadingTimeIn(true);
     try {
       const res = await fetch(
         `${API_BASE}/api/face-recognition-timein/${attendanceId}/${matchedUser.name}/`,
         { method: "POST" }
+        //${matchedUser.name}
+        //${attendanceId}
       );
       const data = await res.json();
       if (res.ok) {
         console.log("Time in uploaded:", data);
-        alert("✅ Time-in successfully recorded!");
+        setTimeInSuccess(true);
       } else {
         alert(data.message || "❌ Failed to time in");
       }
@@ -94,10 +98,10 @@ export default function FaceRecognition() {
           });
           const data = await res.json().catch(() => null);
 
-          if (res.ok && data?.match) {
+          if (res.ok) {
+            console.log("Face match successful, showing time-in button...");
             setMatchedUser({ id: data.user_id, name: data.name });
             clearInterval(intervalRef.current);
-            await uploadTimeIn(data.user_id);
           }
         } catch (err) {
           console.error("Error matching face:", err);
@@ -149,11 +153,20 @@ export default function FaceRecognition() {
           <h3 className="text-blue-800 font-semibold hidden">
             Face Matched! User ID: {matchedUser.id} - {matchedUser.name}
           </h3>
-          {loadingTimeIn ? (
-            <p className="text-blue-600 mt-2">Uploading time in...</p>
-          ) : (
+
+          {!timeInSuccess && (
+            <button
+              onClick={uploadTimeIn}
+              disabled={loadingTimeIn}
+              className="mt-2 w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition"
+            >
+              {loadingTimeIn ? "Uploading..." : "Submit Time In"}
+            </button>
+          )}
+
+          {timeInSuccess && (
             <p className="text-green-600 mt-2 font-medium">
-              Time-in recorded successfully!
+              Time in recorded successfully!
             </p>
           )}
         </div>
