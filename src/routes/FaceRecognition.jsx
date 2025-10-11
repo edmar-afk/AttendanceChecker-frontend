@@ -33,7 +33,6 @@ export default function FaceRecognition() {
           video: true,
         });
         setStream(mediaStream);
-        if (videoRef.current) videoRef.current.srcObject = mediaStream;
       } catch (err) {
         console.error("Camera error:", err);
         alert("Cannot access camera");
@@ -41,14 +40,13 @@ export default function FaceRecognition() {
     };
 
     startCamera();
-
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-      }
-      clearInterval(intervalRef.current);
-    };
   }, []);
+
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream]);
 
   useEffect(() => {
     if (!videoRef.current) return;
