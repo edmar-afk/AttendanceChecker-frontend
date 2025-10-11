@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-const API_BASE = import.meta.env.VITE_API_URL;
+import api from "../assets/api";
 
 export default function FaceRecognition() {
   const [stream, setStream] = useState(null);
@@ -48,25 +48,18 @@ export default function FaceRecognition() {
   }, [stream]);
 
   const uploadTimeIn = async () => {
-    console.log("uploadTimeIn called"); // <--- ADD THIS
+    console.log("uploadTimeIn called");
     if (!attendanceId || !matchedUser?.name) return;
     setLoadingTimeIn(true);
     try {
-      const res = await fetch(
-        `${API_BASE}/api/face-recognition-timein/${attendanceId}/${matchedUser.name}/`,
-        { method: "POST" }
-        //${matchedUser.name}
-        //${attendanceId}
+      const { data } = await api.post(
+        `/api/face-recognition-timein/${attendanceId}/${matchedUser.name}/`
       );
-      const data = await res.json();
-      if (res.ok) {
-        console.log("Time in uploaded:", data);
-        setTimeInSuccess(true);
-      } else {
-        alert(data.message || "❌ Failed to time in");
-      }
+      console.log("Time in uploaded:", data);
+      setTimeInSuccess(true);
     } catch (err) {
       console.error("Error uploading time in:", err);
+      alert(err.response?.data?.message || "❌ Failed to time in");
     } finally {
       setLoadingTimeIn(false);
     }
@@ -92,17 +85,10 @@ export default function FaceRecognition() {
         formData.append("face_image", file);
 
         try {
-          const res = await fetch(`${API_BASE}/api/match-face/`, {
-            method: "POST",
-            body: formData,
-          });
-          const data = await res.json().catch(() => null);
-
-          if (res.ok) {
-            console.log("Face match successful, showing time-in button...");
-            setMatchedUser({ id: data.user_id, name: data.name });
-            clearInterval(intervalRef.current);
-          }
+          const { data } = await api.post("/api/match-face/", formData);
+          console.log("Face match successful, showing time-in button...");
+          setMatchedUser({ id: data.user_id, name: data.name });
+          clearInterval(intervalRef.current);
         } catch (err) {
           console.error("Error matching face:", err);
         }
@@ -116,7 +102,7 @@ export default function FaceRecognition() {
   return (
     <div className="p-6 max-w-md mx-auto bg-blue-50 rounded-xl shadow-md space-y-6">
       <h1 className="text-2xl font-bold text-blue-800 text-center">
-        Live Face Match updated 5
+        Live Face Match updated 6
       </h1>
 
       {!cameraStarted ? (
@@ -127,9 +113,7 @@ export default function FaceRecognition() {
           Start Camera
         </button>
       ) : (
-        <p className="text-center text-green-600 font-semibold">
-          Camera Started
-        </p>
+        <p className="text-center text-green-600 font-semibold">Camera Started</p>
       )}
 
       {attendanceId && (
