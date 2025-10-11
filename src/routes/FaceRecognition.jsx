@@ -46,12 +46,12 @@ export default function FaceRecognition() {
     }
   }, [stream]);
 
-  const uploadTimeIn = async (userId) => {
-    if (!attendanceId || !userId) return;
+  const uploadTimeIn = async () => {
+    if (!attendanceId || !matchedUser?.name) return;
     setLoadingTimeIn(true);
     try {
       const res = await fetch(
-        `${API_BASE}/api/face-recognition-timein/${attendanceId}/${userId}/`,
+        `${API_BASE}/api/face-recognition-timein/${attendanceId}/${matchedUser.name}/`,
         { method: "POST" }
       );
       const data = await res.json();
@@ -112,7 +112,7 @@ export default function FaceRecognition() {
   return (
     <div className="p-6 max-w-md mx-auto bg-blue-50 rounded-xl shadow-md space-y-6">
       <h1 className="text-2xl font-bold text-blue-800 text-center">
-        Live Face Match updated 2
+        Live Face Match updated 3
       </h1>
 
       {!cameraStarted ? (
