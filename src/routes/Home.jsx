@@ -6,7 +6,7 @@ export default function Home() {
   const [capturedImage, setCapturedImage] = useState(null);
   const [userData, setUserData] = useState(null);
   const videoRef = useRef(null);
-
+  
   useEffect(() => {
     const startCamera = async () => {
       try {

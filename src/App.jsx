@@ -12,7 +12,7 @@ function Logout() {
 }
 
 function App() {
-  const userData = JSON.parse(localStorage.getItem("userData"));
+  // const userData = JSON.parse(localStorage.getItem("userData"));
 
   return (
     <BrowserRouter>
@@ -21,13 +21,13 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
 
-        <Route
+        {/* <Route
           path="/"
           element={
             userData && userData.id ? <Navigate to="/home" /> : <Welcome />
           }
-        />
-        <Route path="/home" element={<Home />} />
+        /> */}
+        <Route path="/" element={<Home />} />
         <Route path="/face-recognition" element={<FaceRecognition />} />
         <Route path="/fingerprint-register" element={<FingerprintRegister />} />
       </Routes>
