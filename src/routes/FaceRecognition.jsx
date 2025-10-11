@@ -53,7 +53,7 @@ export default function FaceRecognition() {
     setLoadingTimeIn(true);
     try {
       const { data } = await api.post(
-        `/api/face-recognition-timein/${attendanceId}/${matchedUser.name}/`
+        `/api/facerecognition-timein/${attendanceId}/${matchedUser.name}/`
       );
       console.log("Time in uploaded:", data);
       setTimeInSuccess(true);
