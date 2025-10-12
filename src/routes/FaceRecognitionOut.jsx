@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import api from "../assets/api";
 
-export default function FaceRecognition() {
+export default function FaceRecognitionOut() {
   const [stream, setStream] = useState(null);
   const [matchedUser, setMatchedUser] = useState(null);
   const [attendanceId, setAttendanceId] = useState(null);
   const [cameraStarted, setCameraStarted] = useState(false);
-  const [loadingTimeIn, setLoadingTimeIn] = useState(false);
+  const [loadingTimeOut, setLoadingTimeOut] = useState(false);
   const [timeInSuccess, setTimeInSuccess] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(document.createElement("canvas"));
@@ -47,20 +47,20 @@ export default function FaceRecognition() {
     }
   }, [stream]);
 
-  const uploadTimeIn = async () => {
-    console.log("uploadTimeIn called");
-    setLoadingTimeIn(true);
+  const uploadTimeOut = async () => {
+    console.log("uploadTimeOut called");
+    setLoadingTimeOut(true);
     try {
-      const { data } = await api.post(`/api/facerecognition-timein/${attendanceId}/${matchedUser.name}/`, {});
+      const { data } = await api.post(`/api/facerecognition-timeout/${attendanceId}/${matchedUser.name}/`, {});
       // ${attendanceId}
       // ${matchedUser.name}
       console.log("Time in uploaded:", data);
       setTimeInSuccess(true);
     } catch (err) {
-      console.error("Error uploading time in:", err);
-      alert(err.response?.data?.error || "❌ Failed to time in");
+      console.error("Error uploading time out:", err);
+      alert(err.response?.data?.error || "❌ Failed to time out");
     } finally {
-      setLoadingTimeIn(false);
+      setLoadingTimeOut(false);
     }
   };
 
@@ -85,7 +85,7 @@ export default function FaceRecognition() {
 
         try {
           const { data } = await api.post("/api/match-face/", formData);
-          console.log("Face match successful, showing time-in button...");
+          console.log("Face match successful, showing time-out button...");
           setMatchedUser({ id: data.user_id, name: data.name });
           clearInterval(intervalRef.current);
         } catch (err) {
@@ -101,7 +101,7 @@ export default function FaceRecognition() {
   return (
     <div className="p-6 max-w-md mx-auto bg-blue-50 rounded-xl shadow-md space-y-6">
       <h1 className="text-2xl font-bold text-blue-800 text-center">
-        Live Face Match updated 13
+        Live Face Match updated 13 this is Time out
       </h1>
 
       {!cameraStarted ? (
@@ -141,17 +141,17 @@ export default function FaceRecognition() {
 
           {!timeInSuccess && (
             <button
-              onClick={uploadTimeIn}
-              disabled={loadingTimeIn}
+              onClick={uploadTimeOut}
+              disabled={loadingTimeOut}
               className="mt-2 w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition"
             >
-              {loadingTimeIn ? "Uploading..." : "Submit Time In"}
+              {loadingTimeOut ? "Uploading..." : "Submit Time Out"}
             </button>
           )}
 
           {timeInSuccess && (
             <p className="text-green-600 mt-2 font-medium">
-              Time in recorded successfully! 
+              Time out recorded successfully! 
             </p>
           )}
         </div>
