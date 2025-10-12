@@ -4,7 +4,7 @@ import api from "../assets/api";
 export default function FaceRecognitionOut() {
   const [stream, setStream] = useState(null);
   const [matchedUser, setMatchedUser] = useState(null);
-  const [attendanceId, setAttendanceId] = useState(null);
+  const [attendanceoutId, setattendanceoutId] = useState(null);
   const [cameraStarted, setCameraStarted] = useState(false);
   const [loadingTimeOut, setLoadingTimeOut] = useState(false);
   const [timeInSuccess, setTimeInSuccess] = useState(false);
@@ -16,9 +16,9 @@ export default function FaceRecognitionOut() {
     const handleMessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.attendanceId) {
-          setAttendanceId(data.attendanceId);
-          console.log("Received attendanceId:", data.attendanceId);
+        if (data.attendanceoutId) {
+          setattendanceoutId(data.attendanceoutId);
+          console.log("Received attendanceoutId:", data.attendanceoutId);
         }
       } catch (e) {
         console.error("Invalid message data", e);
@@ -51,8 +51,8 @@ export default function FaceRecognitionOut() {
     console.log("uploadTimeOut called");
     setLoadingTimeOut(true);
     try {
-      const { data } = await api.post(`/api/facerecognition-timeout/${attendanceId}/${matchedUser.name}/`, {});
-      // ${attendanceId}
+      const { data } = await api.post(`/api/facerecognition-timeout/${attendanceoutId}/${matchedUser.name}/`, {});
+      // ${attendanceoutId}
       // ${matchedUser.name}
       console.log("Time in uploaded:", data);
       setTimeInSuccess(true);
@@ -117,9 +117,9 @@ export default function FaceRecognitionOut() {
         </p>
       )}
 
-      {attendanceId && (
+      {attendanceoutId && (
         <p className="text-center text-blue-700 font-medium">
-          Attendance ID: {attendanceId}
+          Attendance ID: {attendanceoutId}
         </p>
       )}
 
