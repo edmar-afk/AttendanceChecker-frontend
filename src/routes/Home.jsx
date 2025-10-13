@@ -6,7 +6,7 @@ export default function Home() {
   const [capturedImage, setCapturedImage] = useState(null);
   const [userData, setUserData] = useState(null);
   const videoRef = useRef(null);
-  
+
   useEffect(() => {
     const startCamera = async () => {
       try {
@@ -143,7 +143,7 @@ export default function Home() {
               </button>
             </div>
             <button
-              onClick={() => setCapturedImage(null)}
+              onClick={() => window.location.reload()}
               className="w-full bg-green-200 text-green-800 font-semibold py-2 px-4 rounded-lg hover:bg-green-300 transition"
             >
               Retake
@@ -152,7 +152,7 @@ export default function Home() {
         )}
       </div>
 
-      {userData && (
+      {/* {userData && (
         <div className="mt-6 p-4 bg-green-100 rounded-lg border border-green-200">
           <h3 className="text-green-800 font-semibold">
             Welcome, {userData.first_name} (ID: {userData.id})
@@ -160,7 +160,7 @@ export default function Home() {
           <Link to={"/face-recognition"}>Face Recognition</Link>
           <Link to={"/fingerprint-register"}>Fingerprint Registerss</Link>
         </div>
-      )}
+      )} */}
     </div>
   );
 }
