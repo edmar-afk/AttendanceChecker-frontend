@@ -101,7 +101,7 @@ export default function FaceRecognition() {
   return (
     <div className="p-6 max-w-md mx-auto bg-blue-50 rounded-xl shadow-md space-y-6">
       <h1 className="text-2xl font-bold text-blue-800 text-center">
-        Live Face Match updated 15
+        Live Face Match
       </h1>
 
       {!cameraStarted ? (
