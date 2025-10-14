@@ -136,7 +136,7 @@ export default function FaceRecognitionOut() {
       {matchedUser && (
         <div className="mt-6 p-4 bg-blue-100 rounded-lg border border-blue-200 text-center">
           <h3 className="text-blue-800 font-semibold">
-            Face Matched! User ID: {matchedUser.name}
+            Face Matched! User ID: {matchedUser.name}  ({matchedUser.id})
           </h3>
 
           {!timeInSuccess && (
