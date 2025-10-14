@@ -51,7 +51,7 @@ export default function FaceRecognition() {
     console.log("uploadTimeIn called");
     setLoadingTimeIn(true);
     try {
-      const { data } = await api.post(`/api/facerecognition-timein/${attendanceId}/${matchedUser.id}/`, {});
+      const { data } = await api.post(`/api/facerecognition-timein/${attendanceId}/${matchedUser.name}/`, {});
       // ${attendanceId}
       // ${matchedUser.name}
       console.log("Time in uploaded:", data);
@@ -101,7 +101,7 @@ export default function FaceRecognition() {
   return (
     <div className="p-6 max-w-md mx-auto bg-blue-50 rounded-xl shadow-md space-y-6">
       <h1 className="text-2xl font-bold text-blue-800 text-center">
-        Live Face Match updated 14
+        Live Face Match updated 15
       </h1>
 
       {!cameraStarted ? (
