@@ -111,7 +111,7 @@ export default function Home() {
   return (
     <div className="p-6 max-w-md mx-auto bg-green-50 rounded-xl shadow-md space-y-6">
       <h1 className="text-2xl font-bold text-green-800 text-center">
-        Face Registration & Verification
+        Face Registration & Verification testing 1 
       </h1>
       <p className="text-center font-extralight text-gray-500">
         Face Room created: {userData}-{randomText}-{randomNumber}
