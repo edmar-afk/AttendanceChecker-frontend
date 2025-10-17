@@ -64,7 +64,7 @@ export default function Home() {
   };
 
   const registerFace = async () => {
-    if (!capturedImage) return alert("No image captured");
+    if (!userData || !userData.id) return alert("User data not loaded yet.");
 
     const formData = new FormData();
     formData.append("face_image", capturedImage);
@@ -74,7 +74,6 @@ export default function Home() {
         method: "POST",
         body: formData,
       });
-
       const data = await res.json().catch(() => null);
       if (res.ok) alert("Face registered successfully!");
       else alert((data && data.message) || "Registration failed");
