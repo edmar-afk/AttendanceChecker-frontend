@@ -100,25 +100,11 @@ export default function Home() {
     }
   };
 
-  function generateRandomString(length = 8) {
-    const chars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-  }
-  const randomText = generateRandomString(5);
-  const randomNumber = Math.floor(Math.random() * 1000);
   return (
     <div className="p-6 max-w-md mx-auto bg-green-50 rounded-xl shadow-md space-y-6">
       <h1 className="text-2xl font-bold text-green-800 text-center">
         Face Registration & Verification
       </h1>
-      <p className="text-center font-extralight text-gray-500">
-        Face Room created: {userData}-{randomText}-{randomNumber}
-      </p>
 
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-green-700">Live Camera</h2>
