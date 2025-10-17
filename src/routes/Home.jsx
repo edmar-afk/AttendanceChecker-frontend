@@ -117,7 +117,7 @@ export default function Home() {
         Face Registration & Verification
       </h1>
       <p className="text-center font-extralight text-gray-500">
-        {userData}-{randomText}-{randomNumber}
+        Face Room created: {userData}-{randomText}-{randomNumber}
       </p>
 
       <div className="space-y-4">
