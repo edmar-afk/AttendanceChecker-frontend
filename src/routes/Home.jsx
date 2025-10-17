@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
 const API_BASE = import.meta.env.VITE_API_URL;
+
 export default function Home() {
   const [stream, setStream] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
@@ -25,16 +25,8 @@ export default function Home() {
 
     startCamera();
 
-    // Load userData from localStorage
-    const storedUserData = localStorage.getItem("userData");
-    if (storedUserData) {
-      setUserData(JSON.parse(storedUserData));
-    }
-
     return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-      }
+      if (stream) stream.getTracks().forEach((track) => track.stop());
     };
   }, []);
 
@@ -42,21 +34,19 @@ export default function Home() {
     const handleMessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        setUserData(data);
-        localStorage.setItem("userData", event.data);
-      } catch (e) {
-        console.error("Failed to parse message from React Native:", e);
+        setUserData(data.user || data);
+        localStorage.setItem("userData", JSON.stringify(data.user || data));
+      } catch (err) {
+        console.error("Failed to parse message from React Native:", err);
       }
     };
 
     window.addEventListener("message", handleMessage);
-
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
   const captureImage = () => {
     if (!videoRef.current) return;
-
     const canvas = document.createElement("canvas");
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
@@ -85,13 +75,7 @@ export default function Home() {
         body: formData,
       });
 
-      let data = null;
-      try {
-        data = await res.json();
-      } catch (err) {
-        console.error("Failed to parse JSON:", err);
-      }
-
+      const data = await res.json().catch(() => null);
       if (res.ok) alert("Face registered successfully!");
       else alert((data && data.message) || "Registration failed");
     } catch (err) {
@@ -105,7 +89,6 @@ export default function Home() {
       <h1 className="text-2xl font-bold text-green-800 text-center">
         Face Registration & Verification
       </h1>
-      
 
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-green-700">Live Camera</h2>
@@ -158,8 +141,6 @@ export default function Home() {
           <h3 className="text-green-800 font-semibold">
             Welcome, {userData.first_name} (ID: {userData.id})
           </h3>
-          {/* <Link to={"/face-recognition"}>Face Recognition</Link>
-          <Link to={"/fingerprint-register"}>Fingerprint Registerss</Link> */}
         </div>
       )}
     </div>
