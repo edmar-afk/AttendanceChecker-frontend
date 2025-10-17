@@ -138,11 +138,11 @@ export default function Home() {
         )}
       </div>
 
-      {userId && (
+      {/* {userId && (
         <div className="mt-6 p-4 bg-green-100 rounded-lg border border-green-200">
           <h3 className="text-green-800 font-semibold">User ID: {userId}</h3>
         </div>
-      )}
+      )} */}
     </div>
   );
 }
