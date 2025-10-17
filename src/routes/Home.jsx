@@ -1,109 +1,128 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import api from "../assets/api";
-
+import React, { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
+const API_BASE = import.meta.env.VITE_API_URL;
 export default function Home() {
   const [stream, setStream] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
   const [userData, setUserData] = useState(null);
-  const [cameraStarted, setCameraStarted] = useState(false);
   const videoRef = useRef(null);
+
+  useEffect(() => {
+    const startCamera = async () => {
+      try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
+        setStream(mediaStream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
+      } catch (err) {
+        console.error("Camera error:", err);
+        alert("Cannot access camera");
+      }
+    };
+
+    startCamera();
+
+    // Load userData from localStorage
+    const storedUserData = localStorage.getItem("userData");
+    if (storedUserData) {
+      setUserData(JSON.parse(storedUserData));
+    }
+
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const handleMessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (data) {
-          setUserData(data.user || data);
-          localStorage.setItem("userData", JSON.stringify(data.user || data));
-        }
+        setUserData(data);
+        localStorage.setItem("userData", event.data);
       } catch (e) {
         console.error("Failed to parse message from React Native:", e);
       }
     };
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, []);
 
-  const startCamera = useCallback(async () => {
-    if (!videoRef.current) return;
-    try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-      });
-      setStream(mediaStream);
-      videoRef.current.srcObject = mediaStream;
-      videoRef.current.play();
-      setCameraStarted(true);
-    } catch (err) {
-      console.error("Camera error:", err);
-      alert("Cannot access camera");
-    }
+    window.addEventListener("message", handleMessage);
+
+    return () => window.removeEventListener("message", handleMessage);
   }, []);
 
   const captureImage = () => {
     if (!videoRef.current) return;
+
     const canvas = document.createElement("canvas");
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
     const context = canvas.getContext("2d");
     context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
-      setCapturedImage(file);
-    }, "image/jpeg");
+    canvas.toBlob(
+      (blob) => {
+        const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
+        setCapturedImage(file);
+      },
+      "image/jpeg",
+      1
+    );
   };
 
   const registerFace = async () => {
     if (!capturedImage) return alert("No image captured");
+
     const formData = new FormData();
     formData.append("face_image", capturedImage);
 
     try {
-      const res = await api.post(
-        `/api/register-face/${userData?.id}/`,
-        formData
-      );
-      if (res.status === 200) alert("Face registered successfully!");
-      else alert("Registration failed");
+      const res = await fetch(`${API_BASE}/api/register-face/${userData.id}/`, {
+        method: "POST",
+        body: formData,
+      });
+
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (err) {
+        console.error("Failed to parse JSON:", err);
+      }
+
+      if (res.ok) alert("Face registered successfully!");
+      else alert((data && data.message) || "Registration failed");
     } catch (err) {
       console.error(err);
       alert("Error registering face");
     }
   };
 
-  useEffect(() => {
-    return () => {
-      if (videoRef.current?.srcObject) {
-        videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, []);
-
+  function generateRandomString(length = 8) {
+    const chars =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+  const randomText = generateRandomString(5);
+  const randomNumber = Math.floor(Math.random() * 1000);
   return (
     <div className="p-6 max-w-md mx-auto bg-green-50 rounded-xl shadow-md space-y-6">
       <h1 className="text-2xl font-bold text-green-800 text-center">
         Face Registration & Verification
       </h1>
-
-      {userData && (
-        <p className="text-center font-extralight text-gray-500">
-          Welcome: {userData.first_name} (ID: {userData.id})
-        </p>
-      )}
+      <p className="text-center font-extralight text-gray-500">
+        Face Room created: {userData}-{randomText}-{randomNumber}
+      </p>
 
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-green-700">Live Camera</h2>
-
-        {!cameraStarted ? (
-          <button
-            onClick={startCamera}
-            className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition"
-          >
-            Start Camera
-          </button>
-        ) : !capturedImage ? (
+        {!capturedImage && (
           <div className="relative">
             <video
               ref={videoRef}
@@ -111,7 +130,7 @@ export default function Home() {
               muted
               playsInline
               className="w-full rounded-lg border border-green-300"
-            />
+            ></video>
             <button
               onClick={captureImage}
               className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 transition"
@@ -119,7 +138,9 @@ export default function Home() {
               Capture
             </button>
           </div>
-        ) : (
+        )}
+
+        {capturedImage && (
           <div className="space-y-2">
             <h3 className="text-green-700 font-semibold">Preview</h3>
             <img
@@ -136,10 +157,7 @@ export default function Home() {
               </button>
             </div>
             <button
-              onClick={() => {
-                setCapturedImage(null);
-                startCamera();
-              }}
+              onClick={() => window.location.reload()}
               className="w-full bg-green-200 text-green-800 font-semibold py-2 px-4 rounded-lg hover:bg-green-300 transition"
             >
               Retake
@@ -147,6 +165,16 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* {userData && (
+        <div className="mt-6 p-4 bg-green-100 rounded-lg border border-green-200">
+          <h3 className="text-green-800 font-semibold">
+            Welcome, {userData.first_name} (ID: {userData.id})
+          </h3>
+          <Link to={"/face-recognition"}>Face Recognition</Link>
+          <Link to={"/fingerprint-register"}>Fingerprint Registerss</Link>
+        </div>
+      )} */}
     </div>
   );
 }
