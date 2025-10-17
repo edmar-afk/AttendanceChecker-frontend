@@ -4,7 +4,7 @@ const API_BASE = import.meta.env.VITE_API_URL;
 export default function Home() {
   const [stream, setStream] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
-  const [userData, setUserData] = useState(null);
+  const [userId, setUserId] = useState(null);
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -33,11 +33,12 @@ export default function Home() {
   useEffect(() => {
     const handleMessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
-        setUserData(data.user || data);
-        localStorage.setItem("userData", JSON.stringify(data.user || data));
+        const data = event.data;
+        if (typeof data === "number") {
+          setUserId(data);
+        }
       } catch (err) {
-        console.error("Failed to parse message from React Native:", err);
+        console.error("Failed to handle message from React Native:", err);
       }
     };
 
@@ -65,12 +66,13 @@ export default function Home() {
 
   const registerFace = async () => {
     if (!capturedImage) return alert("No image captured");
+    if (!userId) return alert("User ID not received yet");
 
     const formData = new FormData();
     formData.append("face_image", capturedImage);
 
     try {
-      const res = await fetch(`${API_BASE}/api/register-face/${userData.id}/`, {
+      const res = await fetch(`${API_BASE}/api/register-face/${userId}/`, {
         method: "POST",
         body: formData,
       });
@@ -136,11 +138,9 @@ export default function Home() {
         )}
       </div>
 
-      {userData && (
+      {userId && (
         <div className="mt-6 p-4 bg-green-100 rounded-lg border border-green-200">
-          <h3 className="text-green-800 font-semibold">
-            Welcome, {userData.first_name} (ID: {userData.id})
-          </h3>
+          <h3 className="text-green-800 font-semibold">User ID: {userId}</h3>
         </div>
       )}
     </div>
