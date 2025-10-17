@@ -6,7 +6,6 @@ export default function Home() {
   const [capturedImage, setCapturedImage] = useState(null);
   const [userData, setUserData] = useState(null);
   const videoRef = useRef(null);
-  const [readyToRegister, setReadyToRegister] = useState(false);
 
   useEffect(() => {
     const startCamera = async () => {
@@ -35,13 +34,13 @@ export default function Home() {
     const handleMessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        setUserData(data);
-        localStorage.setItem("userData", JSON.stringify(data));
-        setReadyToRegister(true); // Web page now ready
+        setUserData(data.user || data);
+        localStorage.setItem("userData", JSON.stringify(data.user || data));
       } catch (err) {
-        console.error(err);
+        console.error("Failed to parse message from React Native:", err);
       }
     };
+
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, []);
@@ -65,7 +64,7 @@ export default function Home() {
   };
 
   const registerFace = async () => {
-   if (!readyToRegister || !userData?.id) return alert("User data not loaded yet.");
+    if (!capturedImage) return alert("No image captured");
 
     const formData = new FormData();
     formData.append("face_image", capturedImage);
@@ -75,6 +74,7 @@ export default function Home() {
         method: "POST",
         body: formData,
       });
+
       const data = await res.json().catch(() => null);
       if (res.ok) alert("Face registered successfully!");
       else alert((data && data.message) || "Registration failed");
@@ -87,7 +87,7 @@ export default function Home() {
   return (
     <div className="p-6 max-w-md mx-auto bg-green-50 rounded-xl shadow-md space-y-6">
       <h1 className="text-2xl font-bold text-green-800 text-center">
-        Face Registration & Verification sample 1 {userData.id}
+        Face Registration & Verification
       </h1>
 
       <div className="space-y-4">
@@ -136,7 +136,13 @@ export default function Home() {
         )}
       </div>
 
-      
+      {userData && (
+        <div className="mt-6 p-4 bg-green-100 rounded-lg border border-green-200">
+          <h3 className="text-green-800 font-semibold">
+            Welcome, {userData.first_name} (ID: {userData.id})
+          </h3>
+        </div>
+      )}
     </div>
   );
 }
