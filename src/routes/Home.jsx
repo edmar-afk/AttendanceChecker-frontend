@@ -87,7 +87,7 @@ export default function Home() {
   return (
     <div className="p-6 max-w-md mx-auto bg-green-50 rounded-xl shadow-md space-y-6">
       <h1 className="text-2xl font-bold text-green-800 text-center">
-        Face Registration & Verification
+        Face Registration & Verification sample 1 {userData.id}
       </h1>
 
       <div className="space-y-4">
@@ -136,13 +136,7 @@ export default function Home() {
         )}
       </div>
 
-      {userData && (
-        <div className="mt-6 p-4 bg-green-100 rounded-lg border border-green-200">
-          <h3 className="text-green-800 font-semibold">
-            Welcome, {userData.first_name} (ID: {userData.id})
-          </h3>
-        </div>
-      )}
+      
     </div>
   );
 }
