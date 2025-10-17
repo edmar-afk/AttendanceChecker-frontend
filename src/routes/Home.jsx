@@ -6,6 +6,7 @@ export default function Home() {
   const [capturedImage, setCapturedImage] = useState(null);
   const [userData, setUserData] = useState(null);
   const videoRef = useRef(null);
+  const [readyToRegister, setReadyToRegister] = useState(false);
 
   useEffect(() => {
     const startCamera = async () => {
@@ -34,13 +35,13 @@ export default function Home() {
     const handleMessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        setUserData(data.user || data);
-        localStorage.setItem("userData", JSON.stringify(data.user || data));
+        setUserData(data);
+        localStorage.setItem("userData", JSON.stringify(data));
+        setReadyToRegister(true); // Web page now ready
       } catch (err) {
-        console.error("Failed to parse message from React Native:", err);
+        console.error(err);
       }
     };
-
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, []);
@@ -64,7 +65,7 @@ export default function Home() {
   };
 
   const registerFace = async () => {
-    if (!userData || !userData.id) return alert("User data not loaded yet.");
+   if (!readyToRegister || !userData?.id) return alert("User data not loaded yet.");
 
     const formData = new FormData();
     formData.append("face_image", capturedImage);
