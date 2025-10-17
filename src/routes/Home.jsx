@@ -9,31 +9,28 @@ export default function Home() {
 
   useEffect(() => {
     const startCamera = async () => {
+      if (!videoRef.current) return;
       try {
         const mediaStream = await navigator.mediaDevices.getUserMedia({
           video: true,
         });
-        setStream(mediaStream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = mediaStream;
-        }
+        videoRef.current.srcObject = mediaStream;
+        videoRef.current.play();
       } catch (err) {
         console.error("Camera error:", err);
-        alert("Cannot access camera");
       }
     };
 
-    startCamera();
-
-    // Load userData from localStorage
-    const storedUserData = localStorage.getItem("userData");
-    if (storedUserData) {
-      setUserData(JSON.parse(storedUserData));
-    }
+    const interval = setInterval(() => {
+      if (videoRef.current) {
+        startCamera();
+        clearInterval(interval);
+      }
+    }, 100);
 
     return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
+      if (videoRef.current?.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);
