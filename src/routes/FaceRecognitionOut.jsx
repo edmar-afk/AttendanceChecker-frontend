@@ -165,7 +165,7 @@ export default function FaceRecognitionOut() {
               onClick={() => window.location.reload()}
               className="w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition"
             >
-              No user found, please try again
+              No user found, adjust Face Angle OR try again
             </button>
           </div>
         )
