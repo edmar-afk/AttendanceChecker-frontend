@@ -51,7 +51,10 @@ export default function FaceRecognition() {
     console.log("uploadTimeIn called");
     setLoadingTimeIn(true);
     try {
-      const { data } = await api.post(`/api/facerecognition-timein/${attendanceId}/${matchedUser.name}/`, {});
+      const { data } = await api.post(
+        `/api/facerecognition-timein/${attendanceId}/${matchedUser.name}/`,
+        {}
+      );
       // ${attendanceId}
       // ${matchedUser.name}
       console.log("Time in uploaded:", data);
@@ -133,10 +136,10 @@ export default function FaceRecognition() {
         ></video>
       </div>
 
-      {matchedUser && (
+      {matchedUser ? (
         <div className="mt-6 p-4 bg-blue-100 rounded-lg border border-blue-200 text-center">
           <h3 className="text-blue-800 font-semibold">
-            Face Matched! User ID: {matchedUser.name}
+            Face Matched! User ID: {matchedUser.name} ({matchedUser.id})
           </h3>
 
           {!timeInSuccess && (
@@ -151,10 +154,21 @@ export default function FaceRecognition() {
 
           {timeInSuccess && (
             <p className="text-green-600 mt-2 font-medium">
-              Time in recorded successfully! 
+              Time in recorded successfully!
             </p>
           )}
         </div>
+      ) : (
+        cameraStarted && (
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition"
+            >
+              No user found, please try again
+            </button>
+          </div>
+        )
       )}
     </div>
   );
