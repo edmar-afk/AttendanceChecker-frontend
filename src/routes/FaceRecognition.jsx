@@ -10,6 +10,7 @@ export default function FaceRecognition() {
   const [loadingTimeIn, setLoadingTimeIn] = useState(false);
   const [timeInSuccess, setTimeInSuccess] = useState(false);
   const [recognizingFace, setRecognizingFace] = useState(false);
+  const [attendanceData, setAttendanceData] = useState(null);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(document.createElement("canvas"));
@@ -42,6 +43,21 @@ export default function FaceRecognition() {
   };
 
   useEffect(() => {
+    if (!attendanceId) return;
+
+    const fetchAttendance = async () => {
+      try {
+        const { data } = await api.get(`/api/attendance/${attendanceId}/`);
+        setAttendanceData(data);
+      } catch (err) {
+        console.error("Failed to fetch attendance:", err);
+      }
+    };
+
+    fetchAttendance();
+  }, [attendanceId]);
+
+  useEffect(() => {
     if (videoRef.current && stream) videoRef.current.srcObject = stream;
   }, [stream]);
 
@@ -59,7 +75,7 @@ export default function FaceRecognition() {
       // Add history log
       await api.post(`/api/history-logs/${user.id}/create/`, {
         title: "Face Recognition",
-        subtitle: `You successfully timed in`,
+        subtitle: `You successfully timed in the event ${attendanceData?.event_name}`,
       });
 
       console.log("History log created");
