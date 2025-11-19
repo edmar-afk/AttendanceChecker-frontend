@@ -57,11 +57,11 @@ export default function FaceRecognition() {
       setTimeInSuccess(true);
 
       // Add history log
-      await api.post("/api/history/", {
-        user: user.id,
+      await api.post(`/api/history-logs/${user.id}/create/`, {
         title: "Face Recognition",
-        subtitle: `You successfully timed in as ${user.name}`,
+        subtitle: `You successfully timed in`,
       });
+
       console.log("History log created");
     } catch (err) {
       console.error("Error uploading time in:", err);
