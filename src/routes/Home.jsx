@@ -86,7 +86,7 @@ export default function Home() {
       const data = await res.json().catch(() => null);
       if (res.ok) {
         alert("Face registered successfully!");
-        await fetch(`${API_BASE}/api/history/`, {
+        await fetch(`${API_BASE}/api/history-logs/${userId}/create/`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -113,7 +113,7 @@ export default function Home() {
 
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-green-700">
-          Live Camera update
+          Live Camera
         </h2>
         {!capturedImage && (
           <div className="relative">
