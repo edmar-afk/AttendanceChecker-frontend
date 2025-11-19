@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 const API_BASE = import.meta.env.VITE_API_URL;
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function Home() {
   const [stream, setStream] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
   const [userId, setUserId] = useState(null);
   const videoRef = useRef(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const startCamera = async () => {
@@ -68,6 +70,8 @@ export default function Home() {
     if (!capturedImage) return alert("No image captured");
     if (!userId) return alert("User ID not received yet");
 
+    setLoading(true);
+
     const formData = new FormData();
     formData.append("face_image", capturedImage);
 
@@ -77,11 +81,11 @@ export default function Home() {
         body: formData,
       });
 
+      setLoading(false);
+
       const data = await res.json().catch(() => null);
       if (res.ok) {
         alert("Face registered successfully!");
-
-        // Add history log
         await fetch(`${API_BASE}/api/history/`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -91,14 +95,12 @@ export default function Home() {
             subtitle: "You successfully registered your face",
           }),
         });
-
-        console.log("History log created successfully");
         setCapturedImage(null);
       } else {
         alert((data && data.message) || "Registration failed");
       }
     } catch (err) {
-      console.error(err);
+      setLoading(false);
       alert("Error registering face");
     }
   };
@@ -110,7 +112,9 @@ export default function Home() {
       </h1>
 
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-green-700">Live Camera update</h2>
+        <h2 className="text-xl font-semibold text-green-700">
+          Live Camera update
+        </h2>
         {!capturedImage && (
           <div className="relative">
             <video
@@ -140,9 +144,14 @@ export default function Home() {
             <div className="flex space-x-2">
               <button
                 onClick={registerFace}
-                className="flex-1 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition"
+                disabled={loading}
+                className="flex-1 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition disabled:bg-green-400"
               >
-                Register Face
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Register Face"
+                )}
               </button>
             </div>
             <button
