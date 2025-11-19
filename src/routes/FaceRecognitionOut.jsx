@@ -11,6 +11,7 @@ export default function FaceRecognitionOut() {
   const videoRef = useRef(null);
   const canvasRef = useRef(document.createElement("canvas"));
   const intervalRef = useRef(null);
+  const [attendanceData, setAttendanceData] = useState(null);
 
   useEffect(() => {
     const handleMessage = (event) => {
@@ -47,21 +48,52 @@ export default function FaceRecognitionOut() {
     }
   }, [stream]);
 
+  useEffect(() => {
+    if (!attendanceoutId) return;
+
+    const fetchAttendance = async () => {
+      try {
+        const { data } = await api.get(`/api/attendance/${attendanceoutId}/`);
+        setAttendanceData(data);
+      } catch (err) {
+        console.error("Failed to fetch attendance:", err);
+      }
+    };
+
+    fetchAttendance();
+  }, [attendanceoutId]);
+
   const uploadTimeOut = async () => {
-    console.log("uploadTimeOut called");
+    if (!matchedUser) return;
     setLoadingTimeOut(true);
     try {
       const { data } = await api.post(
         `/api/facerecognition-timeout/${attendanceoutId}/${matchedUser.name}/`,
         {}
       );
-      // ${attendanceoutId}
-      // ${matchedUser.name}
-      console.log("Time in uploaded:", data);
+      console.log("Time out uploaded:", data);
       setTimeInSuccess(true);
+
+      await api.post(`/api/history-logs/${data.user}/create/`, {
+        title: "Face Recognition",
+        subtitle: `You successfully timed out from the event ${
+          attendanceData?.event_name || ""
+        }`,
+      });
+
+      console.log("History log created for time out");
     } catch (err) {
       console.error("Error uploading time out:", err);
-      alert(err.response?.data?.error || "❌ Failed to time out");
+      const status = err.response?.status;
+      const statusText = err.response?.statusText;
+      const responseData = JSON.stringify(err.response?.data, null, 2);
+      const message = err.message;
+
+      alert(
+        `❌ Failed to time out\n\nStatus: ${status || "N/A"} ${
+          statusText || ""
+        }\nMessage: ${message}\nData: ${responseData || "No response data"}`
+      );
     } finally {
       setLoadingTimeOut(false);
     }
