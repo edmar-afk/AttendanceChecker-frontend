@@ -14,7 +14,9 @@ export default function Home() {
           video: true,
         });
         setStream(mediaStream);
-        if (videoRef.current) videoRef.current.srcObject = mediaStream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
       } catch (err) {
         console.error("Camera error:", err);
         alert("Cannot access camera");
@@ -32,7 +34,9 @@ export default function Home() {
     const handleMessage = (event) => {
       try {
         const data = event.data;
-        if (typeof data === "number") setUserId(data);
+        if (typeof data === "number") {
+          setUserId(data);
+        }
       } catch (err) {
         console.error("Failed to handle message from React Native:", err);
       }
@@ -74,25 +78,8 @@ export default function Home() {
       });
 
       const data = await res.json().catch(() => null);
-      if (res.ok) {
-        alert("Face registered successfully!");
-
-        // Add history log
-        await fetch(`${API_BASE}/api/history/`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user: userId,
-            title: "Face Registration",
-            subtitle: "You successfully registered your face",
-          }),
-        });
-
-        console.log("History log created successfully");
-        setCapturedImage(null);
-      } else {
-        alert((data && data.message) || "Registration failed");
-      }
+      if (res.ok) alert("Face registered successfully!");
+      else alert((data && data.message) || "Registration failed");
     } catch (err) {
       console.error(err);
       alert("Error registering face");
@@ -107,8 +94,7 @@ export default function Home() {
 
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-green-700">Live Camera</h2>
-
-        {!capturedImage ? (
+        {!capturedImage && (
           <div className="relative">
             <video
               ref={videoRef}
@@ -124,7 +110,9 @@ export default function Home() {
               Capture
             </button>
           </div>
-        ) : (
+        )}
+
+        {capturedImage && (
           <div className="space-y-2">
             <h3 className="text-green-700 font-semibold">Preview</h3>
             <img
@@ -149,6 +137,12 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* {userId && (
+        <div className="mt-6 p-4 bg-green-100 rounded-lg border border-green-200">
+          <h3 className="text-green-800 font-semibold">User ID: {userId}</h3>
+        </div>
+      )} */}
     </div>
   );
 }
