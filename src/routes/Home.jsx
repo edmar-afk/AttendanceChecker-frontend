@@ -110,7 +110,7 @@ export default function Home() {
       </h1>
 
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-green-700">Live Camera</h2>
+        <h2 className="text-xl font-semibold text-green-700">Live Camera update</h2>
         {!capturedImage && (
           <div className="relative">
             <video
