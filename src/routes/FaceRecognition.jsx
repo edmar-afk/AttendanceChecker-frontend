@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import api from "../assets/api";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function FaceRecognition() {
   const [stream, setStream] = useState(null);
@@ -8,6 +9,8 @@ export default function FaceRecognition() {
   const [cameraStarted, setCameraStarted] = useState(false);
   const [loadingTimeIn, setLoadingTimeIn] = useState(false);
   const [timeInSuccess, setTimeInSuccess] = useState(false);
+  const [recognizingFace, setRecognizingFace] = useState(false);
+
   const videoRef = useRef(null);
   const canvasRef = useRef(document.createElement("canvas"));
   const intervalRef = useRef(null);
@@ -16,10 +19,7 @@ export default function FaceRecognition() {
     const handleMessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.attendanceId) {
-          setAttendanceId(data.attendanceId);
-          console.log("Received attendanceId:", data.attendanceId);
-        }
+        if (data.attendanceId) setAttendanceId(data.attendanceId);
       } catch (e) {
         console.error("Invalid message data", e);
       }
@@ -42,23 +42,27 @@ export default function FaceRecognition() {
   };
 
   useEffect(() => {
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
-    }
+    if (videoRef.current && stream) videoRef.current.srcObject = stream;
   }, [stream]);
 
-  const uploadTimeIn = async () => {
-    console.log("uploadTimeIn called");
+  const uploadTimeIn = async (user) => {
     setLoadingTimeIn(true);
     try {
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay
       const { data } = await api.post(
-        `/api/facerecognition-timein/${attendanceId}/${matchedUser.name}/`,
+        `/api/facerecognition-timein/${attendanceId}/${user.name}/`,
         {}
       );
-      // ${attendanceId}
-      // ${matchedUser.name}
       console.log("Time in uploaded:", data);
       setTimeInSuccess(true);
+
+      // Add history log
+      await api.post("/api/history/", {
+        user: user.id,
+        title: "Face Recognition",
+        subtitle: `You successfully timed in as ${user.name}`,
+      });
+      console.log("History log created");
     } catch (err) {
       console.error("Error uploading time in:", err);
       alert(err.response?.data?.error || "❌ Failed to time in");
@@ -73,6 +77,7 @@ export default function FaceRecognition() {
     const matchLoop = async () => {
       if (!videoRef.current || matchedUser) return;
 
+      setRecognizingFace(true);
       const video = videoRef.current;
       const canvas = canvasRef.current;
       canvas.width = video.videoWidth;
@@ -88,11 +93,13 @@ export default function FaceRecognition() {
 
         try {
           const { data } = await api.post("/api/match-face/", formData);
-          console.log("Face match successful, showing time-in button...");
+          console.log("Face match successful:", data);
           setMatchedUser({ id: data.user_id, name: data.name });
           clearInterval(intervalRef.current);
         } catch (err) {
           console.error("Error matching face:", err);
+        } finally {
+          setRecognizingFace(false);
         }
       }, "image/jpeg");
     };
@@ -133,10 +140,19 @@ export default function FaceRecognition() {
           muted
           playsInline
           className="w-full rounded-lg border border-blue-300"
-        ></video>
+        />
       </div>
 
-      {matchedUser ? (
+      {recognizingFace && !matchedUser && (
+        <div className="flex flex-col items-center justify-center mt-4">
+          <CircularProgress color="primary" />
+          <p className="mt-2 font-medium text-blue-800">
+            Recognizing Face, please wait...
+          </p>
+        </div>
+      )}
+
+      {matchedUser && (
         <div className="mt-6 p-4 bg-blue-100 rounded-lg border border-blue-200 text-center">
           <h3 className="text-blue-800 font-semibold">
             Face Matched! User ID: {matchedUser.name} ({matchedUser.id})
@@ -144,7 +160,7 @@ export default function FaceRecognition() {
 
           {!timeInSuccess && (
             <button
-              onClick={uploadTimeIn}
+              onClick={() => uploadTimeIn(matchedUser)}
               disabled={loadingTimeIn}
               className="mt-2 w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition"
             >
@@ -158,17 +174,17 @@ export default function FaceRecognition() {
             </p>
           )}
         </div>
-      ) : (
-        cameraStarted && (
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition"
-            >
-              No user found, please try again
-            </button>
-          </div>
-        )
+      )}
+
+      {cameraStarted && !matchedUser && !recognizingFace && (
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => window.location.reload()}
+            className="w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition"
+          >
+            No user found, please try again
+          </button>
+        </div>
       )}
     </div>
   );
