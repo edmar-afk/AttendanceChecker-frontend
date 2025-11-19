@@ -72,7 +72,7 @@ export default function FaceRecognition() {
       setTimeInSuccess(true);
 
       await api.post(`/api/history-logs/${data.user}/create/`, {
-        title: "Face Recognition",
+        title: "Face Recognition Time In",
         subtitle: `You successfully timed in the event ${attendanceData?.event_name}`,
       });
 

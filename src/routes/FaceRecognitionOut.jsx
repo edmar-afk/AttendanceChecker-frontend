@@ -75,7 +75,7 @@ export default function FaceRecognitionOut() {
       setTimeInSuccess(true);
 
       await api.post(`/api/history-logs/${data.user}/create/`, {
-        title: "Face Recognition",
+        title: "Face Recognition Time Out",
         subtitle: `You successfully timed out from the event ${
           attendanceData?.event_name || ""
         }`,
