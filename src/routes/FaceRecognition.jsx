@@ -81,7 +81,16 @@ export default function FaceRecognition() {
       console.log("History log created");
     } catch (err) {
       console.error("Error uploading time in:", err);
-      alert(err.response?.data?.error || "❌ Failed to time in");
+      const status = err.response?.status;
+      const statusText = err.response?.statusText;
+      const data = JSON.stringify(err.response?.data, null, 2);
+      const message = err.message;
+
+      alert(
+        `❌ Failed to time in\n\nStatus: ${status || "N/A"} ${
+          statusText || ""
+        }\nMessage: ${message}\nData: ${data || "No response data"}`
+      );
     } finally {
       setLoadingTimeIn(false);
     }
@@ -127,7 +136,7 @@ export default function FaceRecognition() {
   return (
     <div className="p-6 max-w-md mx-auto bg-blue-50 rounded-xl shadow-md space-y-6">
       <h1 className="text-2xl font-bold text-blue-800 text-center">
-        Live Face Match
+        Live Face Match {attendanceData?.event_name}
       </h1>
 
       {!cameraStarted ? (
