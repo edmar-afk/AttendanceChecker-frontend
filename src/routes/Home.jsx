@@ -78,8 +78,25 @@ export default function Home() {
       });
 
       const data = await res.json().catch(() => null);
-      if (res.ok) alert("Face registered successfully!");
-      else alert((data && data.message) || "Registration failed");
+      if (res.ok) {
+        alert("Face registered successfully!");
+
+        // Add history log
+        await fetch(`${API_BASE}/api/history/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user: userId,
+            title: "Face Registration",
+            subtitle: "You successfully registered your face",
+          }),
+        });
+
+        console.log("History log created successfully");
+        setCapturedImage(null);
+      } else {
+        alert((data && data.message) || "Registration failed");
+      }
     } catch (err) {
       console.error(err);
       alert("Error registering face");
