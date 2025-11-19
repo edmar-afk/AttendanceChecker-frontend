@@ -64,7 +64,6 @@ export default function FaceRecognition() {
   const uploadTimeIn = async (user) => {
     setLoadingTimeIn(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay
       const { data } = await api.post(
         `/api/facerecognition-timein/${attendanceId}/${user.name}/`,
         {}
@@ -72,8 +71,7 @@ export default function FaceRecognition() {
       console.log("Time in uploaded:", data);
       setTimeInSuccess(true);
 
-      // Add history log
-      await api.post(`/api/history-logs/${user.id}/create/`, {
+      await api.post(`/api/history-logs/${data.user}/create/`, {
         title: "Face Recognition",
         subtitle: `You successfully timed in the event ${attendanceData?.event_name}`,
       });
@@ -180,7 +178,7 @@ export default function FaceRecognition() {
       {matchedUser && (
         <div className="mt-6 p-4 bg-blue-100 rounded-lg border border-blue-200 text-center">
           <h3 className="text-blue-800 font-semibold">
-            Face Matched! User ID: {matchedUser.name} ({matchedUser.id})
+            Face Matched! User ID: {matchedUser.name} ({matchedUser.id}) 1
           </h3>
 
           {!timeInSuccess && (
